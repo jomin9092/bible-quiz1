@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>구약 성경목록 시험</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f6f6;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .description {
+      text-align: center;
+      color: #555;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .question {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .number {
+      width: 36px;
+      font-weight: bold;
+    }
+
+    .hint {
+      width: 50px;
+      text-align: center;
+      background: #eee;
+      padding: 8px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      background: #2f5bea;
+      color: white;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #2448bb;
+    }
+
+    .result {
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 12px;
+      background: #f0f4ff;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .correct {
+      border-color: #2e9d55;
+      background: #f0fff4;
+    }
+
+    .wrong {
+      border-color: #d93025;
+      background: #fff0f0;
+    }
+
+    .answer {
+      font-size: 13px;
+      color: #d93025;
+      margin-left: 94px;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 500px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 16px;
+      }
+
+      .question {
+        gap: 6px;
+      }
+
+      .hint {
+        width: 42px;
+      }
+
+      input {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>구약 성경목록 시험</h1>
+  <p class="description">
+    약어 힌트를 보고 구약 성경 이름을 순서대로 적어보세요.<br>
+    힌트가 없는 칸은 직접 외워서 적어야 합니다.
+  </p>
+
+  <div id="quiz"></div>
+
+  <button onclick="checkAnswers()">채점하기</button>
+
+  <div id="result"></div>
+</div>
+
+<script>
+  const oldTestament = [
+    { name: "창세기", hint: "창" },
+    { name: "출애굽기", hint: "출" },
+    { name: "레위기", hint: "레" },
+    { name: "민수기", hint: "민" },
+    { name: "신명기", hint: "신" },
+    { name: "여호수아", hint: "수" },
+    { name: "사사기", hint: "삿" },
+    { name: "룻기", hint: "룻" },
+    { name: "사무엘상", hint: "삼상" },
+    { name: "사무엘하", hint: "삼하" },
+    { name: "열왕기상", hint: "왕상" },
+    { name: "열왕기하", hint: "왕하" },
+    { name: "역대상", hint: "대상" },
+    { name: "역대하", hint: "대하" },
+    { name: "에스라", hint: "스" },
+    { name: "느헤미야", hint: "느" },
+    { name: "에스더", hint: "에" },
+    { name: "욥기", hint: "욥" },
+    { name: "시편", hint: "시" },
+    { name: "잠언", hint: "잠" },
+    { name: "전도서", hint: "전" },
+    { name: "아가", hint: "아" },
+    { name: "이사야", hint: "사" },
+    { name: "예레미야", hint: "렘" },
+    { name: "예레미야애가", hint: "애" },
+    { name: "에스겔", hint: "겔" },
+    { name: "다니엘", hint: "단" },
+    { name: "호세아", hint: "호" },
+    { name: "요엘", hint: "욜" },
+    { name: "아모스", hint: "암" },
+    { name: "오바댜", hint: "옵" },
+    { name: "요나", hint: "욘" },
+    { name: "미가", hint: "미" },
+    { name: "나훔", hint: "나" },
+    { name: "하박국", hint: "합" },
+    { name: "스바냐", hint: "습" },
+    { name: "학개", hint: "학" },
+    { name: "스가랴", hint: "슥" },
+    { name: "말라기", hint: "말" }
+  ];
+
+  const hintRate = 0.7;
+
+  function normalize(text) {
+    return text.replace(/\s/g, "").trim();
+  }
+
+  function makeHintIndexes() {
+    const total = oldTestament.length;
+    const hintCount = Math.round(total * hintRate);
+
+    const indexes = Array.from({ length: total }, (_, i) => i);
+
+    indexes.sort(() => Math.random() - 0.5);
+
+    return indexes.slice(0, hintCount);
+  }
+
+  function makeQuiz() {
+    const quizDiv = document.getElementById("quiz");
+    quizDiv.innerHTML = "";
+
+    const hintIndexes = makeHintIndexes();
+
+    oldTestament.forEach((book, index) => {
+      const showHint = hintIndexes.includes(index);
+      const hintText = showHint ? book.hint : "";
+
+      const questionDiv = document.createElement("div");
+      questionDiv.className = "question";
+
+      questionDiv.innerHTML = `
+        <div class="number">${index + 1}.</div>
+        <div class="hint">${hintText}</div>
+        <input type="text" id="answer${index}" placeholder="성경 이름 입력">
+      `;
+
+      quizDiv.appendChild(questionDiv);
+
+      const answerDiv = document.createElement("div");
+      answerDiv.id = `correctAnswer${index}`;
+      answerDiv.className = "answer";
+      answerDiv.style.display = "none";
+      quizDiv.appendChild(answerDiv);
+    });
+  }
+
+  function checkAnswers() {
+    let score = 0;
+
+    oldTestament.forEach((book, index) => {
+      const input = document.getElementById(`answer${index}`);
+      const answerDiv = document.getElementById(`correctAnswer${index}`);
+
+      const userAnswer = normalize(input.value);
+      const correctAnswer = normalize(book.name);
+
+      input.classList.remove("correct", "wrong");
+
+      if (userAnswer === correctAnswer) {
+        score++;
+        input.classList.add("correct");
+        answerDiv.style.display = "none";
+      } else {
+        input.classList.add("wrong");
+        answerDiv.innerText = `정답: ${book.name}`;
+        answerDiv.style.display = "block";
+      }
+    });
+
+    const resultDiv = document.getElementById("result");
+    resultDiv.className = "result";
+    resultDiv.innerHTML = `
+      총점: ${score} / ${oldTestament.length}점<br>
+      ${score === oldTestament.length ? "완벽합니다!" : "틀린 문제를 다시 확인해보세요."}
+    `;
+  }
+
+  makeQuiz();
+</script>
+
+</body>
+</html>
